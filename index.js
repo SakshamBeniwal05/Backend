@@ -1,4 +1,4 @@
-import { app } from "./src/app";
+import { app } from "./src/app.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
