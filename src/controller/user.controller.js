@@ -25,9 +25,17 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!avatarFile?.path) {
         throw new apiError(400, "Please add avatar image")
     }
+    console.log(avatarFile);
+   
 
     // upload avatar to cloudinary
     const avatar = await cloudinary_Upload(avatarFile.path)
+    console.log(avatar);
+    
+    // check if cloudinary upload was successful
+    if (!avatar || !avatar.url) {
+        throw new apiError(500, "Failed to upload avatar to cloudinary")
+    }
 
     // create user entry
     const newUser = await User.create({
@@ -37,6 +45,9 @@ const registerUser = asyncHandler(async (req, res) => {
         password,
         avatar: avatar.url,
     })
+
+    console.log(newUser);
+    
 
     // fetch user without password & token
     const createdUser = await User.findById(newUser._id).select("-password -refreshToken")

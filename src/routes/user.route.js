@@ -12,4 +12,4 @@ userRouter.route('/register').post(upload.fields([{
     maxCount: 1
 }]), registerUser)
 
-export default userRouter
+export default userRouter 
