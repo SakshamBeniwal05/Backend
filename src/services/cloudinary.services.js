@@ -1,5 +1,4 @@
 import { v2 as cloudinary } from "cloudinary";
-import asyncHandler from "../utils/async.utils";
 import fs from "fs"
 
 cloudinary.config({

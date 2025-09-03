@@ -3,7 +3,6 @@ import apiError from "../utils/error.utlis.js"
 import { User } from "../models/user.model.js"
 import cloudinary_Upload from "../services/cloudinary.services.js"
 import apiResponse from "../utils/response.utils.js"
-import { configDotenv } from "dotenv"
 
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, fullname, password } = req.body
