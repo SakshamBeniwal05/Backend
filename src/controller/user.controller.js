@@ -70,4 +70,4 @@ const test = asyncHandler((req, res) => {
         data: userdata
     })
 })
-export { test, registerUser }    
+export { test, registerUser }
