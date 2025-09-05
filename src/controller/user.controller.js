@@ -4,6 +4,26 @@ import { User } from "../models/user.model.js"
 import cloudinary_Upload from "../services/cloudinary.services.js"
 import apiResponse from "../utils/response.utils.js"
 
+const getTokens = async (userId) => {
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new apiError(404, "User not found for token generation");
+        }
+
+        const refresh = user.RefreshTokenGenerator();
+        const access = user.AccessTokenGeneration();
+
+        user.refreshToken = refresh;
+        await user.save({ validateBeforeSave: false });
+        return { access, refresh };
+
+    }
+    catch (error) {
+        throw new apiError(500, "Server error: can't generate session");
+    }
+};
+
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, fullname, password } = req.body
 
@@ -83,8 +103,8 @@ const loginUser = asyncHandler(async (req, res) => {
         data = await User.findOne({ username })
     }
 
-    if(!data){
-        throw new apiError(400,"wrong username or password")
+    if (!data) {
+        throw new apiError(400, "wrong username or password")
     }
 
     //password check
@@ -95,6 +115,11 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     //access and referesh token
+
+    const { accessToken, refreshToken } = await getTokens(data._id)
+    console.log(data);
+
+    //response sent
 
     return res.status(201).json(
         new apiResponse(201, data, "User logined successfully")
@@ -108,4 +133,4 @@ const test = asyncHandler((req, res) => {
         data: userdata
     })
 })
-export { test, registerUser,loginUser }
+export { test, registerUser, loginUser }
