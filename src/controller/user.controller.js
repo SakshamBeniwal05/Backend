@@ -26,12 +26,12 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new apiError(400, "Please add avatar image")
     }
     console.log(avatarFile);
-   
+
 
     // upload avatar to cloudinary
     const avatar = await cloudinary_Upload(avatarFile.path)
     console.log(avatar);
-    
+
     // check if cloudinary upload was successful
     if (!avatar || !avatar.url) {
         throw new apiError(500, "Failed to upload avatar to cloudinary")
@@ -47,7 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     console.log(newUser);
-    
+
 
     // fetch user without password & token
     const createdUser = await User.findById(newUser._id).select("-password -refreshToken")
@@ -62,12 +62,50 @@ const registerUser = asyncHandler(async (req, res) => {
     )
 })
 
-const test = asyncHandler((req, res) => {
+const loginUser = asyncHandler(async (req, res) => {
+    //send cookie
 
+    // req body -> data
+    const { username_email, password } = req.body
+
+    if (!username_email || !password) {
+        throw new apiError(400, "Please enter credentials")
+    }
+
+    //find the user
+    let email, username, data
+    if (username_email.includes("@")) {
+        email = username_email
+        data = await User.findOne({ email })
+    }
+    else {
+        username = username_email
+        data = await User.findOne({ username })
+    }
+
+    if(!data){
+        throw new apiError(400,"wrong username or password")
+    }
+
+    //password check
+    const password_validator = await data.isPasswordCorrect(password)
+
+    if (!password_validator) {
+        throw new apiError(400, "incorrect passoword")
+    }
+
+    //access and referesh token
+
+    return res.status(201).json(
+        new apiResponse(201, data, "User logined successfully")
+    )
+})
+
+const test = asyncHandler((req, res) => {
     const userdata = req.body
     res.status(200).json({
         message: "hello_world",
         data: userdata
     })
 })
-export { test, registerUser }
+export { test, registerUser,loginUser }
