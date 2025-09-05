@@ -15,4 +15,4 @@ userRouter.route('/register').post(upload.fields([{
 userRouter.route('/login').post(loginUser)
 userRouter.route('/logout').post(verification, logoutUser)
 
-export default userRouter 
+export default userRouter
