@@ -15,7 +15,8 @@ const getTokens = async (userId) => {
         const access = user.AccessTokenGeneration();
 
         user.refreshToken = refresh;
-        await user.save({ validateBeforeSave: false });
+        await user.save({ validateBeforeSave: false })
+
         return { access, refresh };
 
     }
@@ -83,14 +84,16 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 const loginUser = asyncHandler(async (req, res) => {
-    //send cookie
+
 
     // req body -> data
+
     const { username_email, password } = req.body
 
     if (!username_email || !password) {
         throw new apiError(400, "Please enter credentials")
     }
+
 
     //find the user
     let email, username, data
@@ -107,6 +110,7 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new apiError(400, "wrong username or password")
     }
 
+
     //password check
     const password_validator = await data.isPasswordCorrect(password)
 
@@ -114,26 +118,27 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new apiError(400, "incorrect passoword")
     }
 
-    //access and referesh token
+    const { access: accessToken, refresh: refreshToken } = await getTokens(data._id)
 
-    const { accessToken, refreshToken } = await getTokens(data._id)
-    console.log(data);
-
-
-    //cookies options 
+    
+    //cookies options
 
     const options = {
         httpOnly: true,
         secure: true
     }
 
+    
 
     //response sent
+    
+    console.log({accessToken ,refreshToken});
+    
 
     return res.status(201)
         .cookie("accessToken", accessToken, options)
-        .cookie("accessToken", accessToken, options)
-        .json(200, "Loggined Successfully")
+        .cookie("refreshToken", refreshToken, options)
+        .json({status: 200,message: "Loggined Successfully"})
 })
 
 const logoutUser = asyncHandler(async (req, res) => {
@@ -158,7 +163,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         .status(200)
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
-        .json(new ApiResponse(200, {}, "User logged Out"))
+        .json(new apiResponse(200, "User logged Out"))
 })
 
 
