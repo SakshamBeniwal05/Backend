@@ -203,6 +203,11 @@ const tokenRefreshing = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, "token provided successfully"))
 })
 
+const getCurrentUser = asyncHandler(async(req,res)=>{
+    const currenUserData = req.user
+    res.json(new apiResponse(200,currenUserData,"current user fetched successfully"))
+})
+
 const test = asyncHandler((req, res) => {
     const userdata = req.body
     res.status(200).json({
@@ -211,4 +216,4 @@ const test = asyncHandler((req, res) => {
     })
 })
 
-export { test, registerUser, loginUser, logoutUser, tokenRefreshing }
+export { test, registerUser, loginUser, logoutUser, tokenRefreshing, getCurrentUser }
