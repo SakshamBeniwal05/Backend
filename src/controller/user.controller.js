@@ -170,17 +170,14 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const tokenRefreshing = asyncHandler(async (req, res) => {
 
-    //fetch from User
-
-    const incomingToken = req.cookies?.accessToken || req.body.accessToken
+    // Use refresh token, not access token
+    const incomingToken = req.cookies?.refreshToken || req.body.refreshToken
 
     if (!incomingToken) {
-        throw new apiError(400, "no access token found please provide to refreshToken")
+        throw new apiError(400, "No refresh token found, please provide refreshToken")
     }
 
-
-    //checking the token and unwrapping it finding the essential values for further tasks
-
+    // Verify with refresh token secret
     const decodedIncomingToken = jwt.verify(incomingToken, process.env.REFRESH_TOKEN_VALUE)
 
     const incomingTokenData = await User.findById(decodedIncomingToken._id)
@@ -198,7 +195,7 @@ const tokenRefreshing = asyncHandler(async (req, res) => {
         secure: true
     }
 
-    const { accessToken, refreshToken } = getTokens(incomingTokenData._id)
+    const { access: accessToken, refresh: refreshToken } = await getTokens(incomingTokenData._id)
 
     return res.status(200)
         .cookie("accessToken", accessToken, options)
