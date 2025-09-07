@@ -3,6 +3,7 @@ import apiError from "../utils/error.utlis.js"
 import { User } from "../models/user.model.js"
 import cloudinary_Upload from "../services/cloudinary.services.js"
 import apiResponse from "../utils/response.utils.js"
+import jwt, { decode } from "jsonwebtoken"
 
 const getTokens = async (userId) => {
     try {
@@ -120,7 +121,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const { access: accessToken, refresh: refreshToken } = await getTokens(data._id)
 
-    
+
     //cookies options
 
     const options = {
@@ -128,27 +129,28 @@ const loginUser = asyncHandler(async (req, res) => {
         secure: true
     }
 
-    
+
 
     //response sent
-    
-    console.log({accessToken ,refreshToken});
-    
+
+    console.log({ accessToken, refreshToken });
+
 
     return res.status(201)
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
-        .json({status: 200,message: "Loggined Successfully"})
+        .json({ status: 200, message: "Loggined Successfully" })
 })
 
 const logoutUser = asyncHandler(async (req, res) => {
 
     await User.findByIdAndUpdate(
         req.user._id,
-        { 
+        {
             $unset: {
-                refreshToken: 1 
-            }},
+                refreshToken: 1
+            }
+        },
         {
             new: true
         }
@@ -166,6 +168,43 @@ const logoutUser = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, "User logged Out"))
 })
 
+const tokenRefreshing = asyncHandler(async (req, res) => {
+
+    //fetch from User
+
+    const incomingToken = req.cookies?.accessToken || req.body.accessToken
+
+    if (!incomingToken) {
+        throw new apiError(400, "no access token found please provide to refreshToken")
+    }
+
+
+    //checking the token and unwrapping it finding the essential values for further tasks
+
+    const decodedIncomingToken = jwt.verify(incomingToken, process.env.REFRESH_TOKEN_VALUE)
+
+    const incomingTokenData = await User.findById(decodedIncomingToken._id)
+
+    if (!incomingTokenData) {
+        throw new apiError(400, "Invalid token")
+    }
+
+    if (incomingToken !== incomingTokenData.refreshToken) {
+        throw new apiError(400, "Refresh token expired")
+    }
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    const { accessToken, refreshToken } = getTokens(incomingTokenData._id)
+
+    return res.status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new apiResponse(200, "token provided successfully"))
+})
 
 const test = asyncHandler((req, res) => {
     const userdata = req.body
@@ -174,4 +213,4 @@ const test = asyncHandler((req, res) => {
         data: userdata
     })
 })
-export { test, registerUser, loginUser, logoutUser }
+export { test, registerUser, loginUser, logoutUser, tokenRefreshing }
