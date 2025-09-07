@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from "cloudinary"
 import fs from "fs"
 import dotenv from "dotenv";
-import apiError from "../utils/error.utlis";
+import apiError from "../utils/error.utlis.js";
 
 dotenv.config({ path: "./.env" });
 cloudinary.config({
@@ -58,6 +58,4 @@ const cloudinary_Update = async (current_Url, newFile) => {
     }
 }
 
-
-
-export default { cloudinary_Upload, cloudinary_Update }
+export { cloudinary_Upload, cloudinary_Update }

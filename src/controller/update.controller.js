@@ -2,7 +2,7 @@ import { User } from "../models/user.model.js";
 import asyncHandler from "../utils/async.utils.js";
 import apiError from "../utils/error.utlis.js";
 import apiResponse from "../utils/response.utils.js";
-import { cloudinary_Upload, cloudinary_Update } from "../services/cloudinary.services.js";
+import { cloudinary_Update } from "../services/cloudinary.services.js";
 
 const updateAvatar = asyncHandler(async (req, res) => {
     // Fetch user data from DB using auth middleware
@@ -42,7 +42,7 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     const oldCoverImage = userData.coverimage;
 
     // New cover image file from user input
-    const newCoverImage = req.file;
+    const newCoverImage = req.file; 
 
     // Ensure file is provided
     if (!newCoverImage?.path) {
