@@ -25,6 +25,14 @@ const cloudinary_Upload = async (localFilePath) => {
     }
 }
 
+const cloudinary_Update = async()=>{
+    try {
+        
+    } catch (error) {
+        
+    }
+}
 
 
-export default cloudinary_Upload
+
+export default {cloudinary_Upload, cloudinary_Update}

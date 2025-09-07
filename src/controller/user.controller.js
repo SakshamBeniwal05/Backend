@@ -1,9 +1,9 @@
 import asyncHandler from "../utils//async.utils.js"
 import apiError from "../utils/error.utlis.js"
 import { User } from "../models/user.model.js"
-import cloudinary_Upload from "../services/cloudinary.services.js"
+import {cloudinary_Upload} from "../services/cloudinary.services.js"
 import apiResponse from "../utils/response.utils.js"
-import jwt, { decode } from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 
 const getTokens = async (userId) => {
     try {
@@ -210,4 +210,5 @@ const test = asyncHandler((req, res) => {
         data: userdata
     })
 })
+
 export { test, registerUser, loginUser, logoutUser, tokenRefreshing }
