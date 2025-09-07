@@ -88,4 +88,4 @@ const updatePassword = asyncHandler(async (req, res) => {
     res.status(200).json(new apiResponse(200, "Password updated successfully"));
 });
 
-export { updateAvatar, updateCoverImage, updatePassword };
+export { updateAvatar, updateCoverImage, updatePassword };  

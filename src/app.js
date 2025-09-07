@@ -18,6 +18,6 @@ import userRouter from "./routes/user.route.js"
 import updateRouter from "./routes/update.route.js";
 
 app.use('/api/v1/users',userRouter)
-app.use('api/v1/update',updateRouter)
+app.use('/api/v1/update',updateRouter)
 
 export { app }
