@@ -57,5 +57,3 @@ const cloudinary_Update = async (current_Url, newFile) => {
         throw new apiError(500,"update file failed")
     }
 }
-
-export { cloudinary_Upload, cloudinary_Update }
