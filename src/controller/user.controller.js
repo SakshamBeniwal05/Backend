@@ -1,7 +1,7 @@
 import asyncHandler from "../utils//async.utils.js"
 import apiError from "../utils/error.utlis.js"
 import { User } from "../models/user.model.js"
-import {cloudinary_Upload} from "../services/cloudinary.services.js"
+import { cloudinary_Upload } from "../services/cloudinary.services.js"
 import apiResponse from "../utils/response.utils.js"
 import jwt from "jsonwebtoken"
 
@@ -13,7 +13,7 @@ const getTokens = async (userId) => {
         }
 
         const refresh = user.RefreshTokenGenerator();
-        const access = user.AccessTokenGeneration();
+        const access = user.AccessTokenGenerator();
 
         user.refreshToken = refresh;
         await user.save({ validateBeforeSave: false })
@@ -48,7 +48,6 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new apiError(400, "Please add avatar image")
     }
     console.log(avatarFile);
-
 
     // upload avatar to cloudinary
     const avatar = await cloudinary_Upload(avatarFile.path)
@@ -203,9 +202,9 @@ const tokenRefreshing = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, "token provided successfully"))
 })
 
-const getCurrentUser = asyncHandler(async(req,res)=>{
+const getCurrentUser = asyncHandler(async (req, res) => {
     const currenUserData = req.user
-    res.json(new apiResponse(200,currenUserData,"current user fetched successfully"))
+    res.json(new apiResponse(200, currenUserData, "current user fetched successfully"))
 })
 
 const test = asyncHandler((req, res) => {
@@ -216,4 +215,73 @@ const test = asyncHandler((req, res) => {
     })
 })
 
-export { test, registerUser, loginUser, logoutUser, tokenRefreshing, getCurrentUser }
+const channel_details_fetch = asyncHandler(async (req, res) => {
+
+    const { username } = req.params
+
+    if (!username?.trim()) {
+        throw new apiError(400, "no channel exist on this username")
+    }
+
+    const channel = await User.aggregate([
+        {
+            $match: {
+                username: username?.toLowerCase()
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                foreignField: "channel",
+                localField: "_id",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                foreignField: "subscriber",
+                localField: "_id",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscriberCount: {
+                    $size: "$subscribers"
+                },
+                channel_Subscribed_count: {
+                    $size: "subscribedTo"
+                },
+                isSubscribed: {
+                    $cond: {
+                        if: {$in: [req.user?._id,"$subscribers.subscriber"]},
+                        then: true,
+                        else: false,
+                    }
+                }
+            }
+        },
+        {
+            $project:{
+                fullname: 1,
+                username: 1,
+                subscriberCount: 1,
+                channel_Subscribed_count: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                
+            }
+        }
+    ])
+
+    if(!channel?.length){ 
+        throw new apiError(400,"channel doesnt exist")
+    }
+
+    return res.status(200).json(new apiResponse(200,channel[0],"user channel fetched done"))
+})
+
+
+
+export { test, registerUser, loginUser, logoutUser, tokenRefreshing, getCurrentUser, channel_details_fetch }
