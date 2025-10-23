@@ -298,11 +298,11 @@ const get_history = asyncHandler(async (req, res) => {
                 as: "watchHistory",
                 pipeline: [{
                     $lookup: {
-                        from:"users",
-                        foreignField:"_id",
-                        localField:"owner",
-                        as:"owner",
-                        pipeline:[{
+                        from: "users",
+                        foreignField: "_id",
+                        localField: "owner",
+                        as: "owner",
+                        pipeline: [{
                             $projectL: {
                                 fullname: 1,
                                 username: 1,
@@ -310,10 +310,20 @@ const get_history = asyncHandler(async (req, res) => {
                             }
                         }]
                     }
-                }]
+                },
+                {
+                    $addFields: {
+                        owner: {
+                            $first: "$owner"
+                        }
+                    }
+                }
+                ]
             }
         }
     ])
+
+    return res.status(200).json( new apiResponse(200, user[0].watchHistory, "watchHistorys fetcher"))
 })
 
-export { test, registerUser, loginUser, logoutUser, tokenRefreshing, getCurrentUser, channel_details_fetch }
+export { test, registerUser, loginUser, logoutUser, tokenRefreshing, getCurrentUser, channel_details_fetch, get_history }
