@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js"
 import { cloudinary_Upload } from "../services/cloudinary.services.js"
 import apiResponse from "../utils/response.utils.js"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
 const getTokens = async (userId) => {
     try {
@@ -255,7 +256,7 @@ const channel_details_fetch = asyncHandler(async (req, res) => {
                 },
                 isSubscribed: {
                     $cond: {
-                        if: {$in: [req.user?._id,"$subscribers.subscriber"]},
+                        if: { $in: [req.user?._id, "$subscribers.subscriber"] },
                         then: true,
                         else: false,
                     }
@@ -263,25 +264,56 @@ const channel_details_fetch = asyncHandler(async (req, res) => {
             }
         },
         {
-            $project:{
+            $project: {
                 fullname: 1,
                 username: 1,
                 subscriberCount: 1,
                 channel_Subscribed_count: 1,
                 isSubscribed: 1,
                 avatar: 1,
-                
+
             }
         }
     ])
 
-    if(!channel?.length){ 
-        throw new apiError(400,"channel doesnt exist")
+    if (!channel?.length) {
+        throw new apiError(400, "channel doesnt exist")
     }
 
-    return res.status(200).json(new apiResponse(200,channel[0],"user channel fetched done"))
+    return res.status(200).json(new apiResponse(200, channel[0], "user channel fetched done"))
 })
 
-
+const get_history = asyncHandler(async (req, res) => {
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user._id)
+            },
+        },
+        {
+            $lookup: {
+                from: "videos",
+                foreignField: "_id",
+                localField: "watchHistory",
+                as: "watchHistory",
+                pipeline: [{
+                    $lookup: {
+                        from:"users",
+                        foreignField:"_id",
+                        localField:"owner",
+                        as:"owner",
+                        pipeline:[{
+                            $projectL: {
+                                fullname: 1,
+                                username: 1,
+                                avatar: 1,
+                            }
+                        }]
+                    }
+                }]
+            }
+        }
+    ])
+})
 
 export { test, registerUser, loginUser, logoutUser, tokenRefreshing, getCurrentUser, channel_details_fetch }
