@@ -12,13 +12,12 @@ const getTokens = async (userId) => {
         if (!user) {
             throw new apiError(404, "User not found for token generation");
         }
-
+        
         const refresh = user.RefreshTokenGenerator();
         const access = user.AccessTokenGenerator();
 
         user.refreshToken = refresh;
         await user.save({ validateBeforeSave: false })
-
         return { access, refresh };
 
     }

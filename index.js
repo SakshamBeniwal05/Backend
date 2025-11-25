@@ -5,7 +5,8 @@ import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 
 (async()=>{
-    try {
+    try 
+    {
         await mongoose.connect(`${process.env.DATABASE_URL}/backend_database`)
 
         app.on('error',(error)=>{
@@ -14,7 +15,6 @@ dotenv.config({ path: "./.env" });
         app.get('/',(req,res)=>{
             res.send('<h1>connection estabilish</h1>')
         })
-
         app.listen(process.env.PORT || 8000,()=>{
             console.log("connection estabilish")
         })
