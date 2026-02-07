@@ -28,12 +28,10 @@ const getTokens = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, fullname, password } = req.body
-
     // validation - not empty
     if ([username, email, fullname, password].some(field => field?.trim() === "")) {
         throw new apiError(400, "All fields are required")
     }
-
     // check if user already exists
     if (await User.findOne({ username })) {
         throw new apiError(400, "Username already exists")
@@ -41,23 +39,19 @@ const registerUser = asyncHandler(async (req, res) => {
     if (await User.findOne({ email })) {
         throw new apiError(400, "Account already exists with this email")
     }
-
     // check for avatar
     const avatarFile = req.files?.avatar?.[0]
     if (!avatarFile?.path) {
         throw new apiError(400, "Please add avatar image")
     }
     console.log(avatarFile);
-
     // upload avatar to cloudinary
     const avatar = await cloudinary_Upload(avatarFile.path)
     console.log(avatar);
-
     // check if cloudinary upload was successful
     if (!avatar || !avatar.url) {
         throw new apiError(500, "Failed to upload avatar to cloudinary")
     }
-
     // create user entry
     const newUser = await User.create({
         fullname,
@@ -68,8 +62,6 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     console.log(newUser);
-
-
     // fetch user without password & token
     const createdUser = await User.findById(newUser._id).select("-password -refreshToken")
 

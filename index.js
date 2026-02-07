@@ -8,7 +8,6 @@ dotenv.config({ path: "./.env" });
     try 
     {
         await mongoose.connect(`${process.env.DATABASE_URL}/backend_database`)
-
         app.on('error',(error)=>{
             console.log(`error in express${error}`);
         })
